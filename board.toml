@@ -25,6 +25,15 @@ windows = [
 
 [kernel]
 defconfig = "gta4l_defconfig"
+# Builders run before the link; these cover every flag the defconfig enables.
+archives = [
+  "build-corecrypto-14.py",
+  "build-corecrypto-14.py --namespace",
+  "build-arm-driver.py ArmDTPlatform",
+  "build-arm-driver.py ArmCpu",
+  "build-mockfs-fixture.py",
+  "build-libpthread-kernel.py",
+]
 
 [kernel.prelink]
 tool = "kits/NativePrelink/emit_prelink.py"
