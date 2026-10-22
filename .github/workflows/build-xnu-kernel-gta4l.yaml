@@ -70,10 +70,9 @@ jobs:
         run: cd UniXNU && ./unixnu fetch
         timeout-minutes: 60
   
-      # Kernel first: IPSW fetching stays off until the kernel links.
-      # - name: Fetch IPSW
-      #   run: cd UniXNU && ./unixnu ipsw fetch
-      #   timeout-minutes: 60
+      - name: Fetch IPSW
+        run: cd UniXNU && ./unixnu ipsw fetch
+        timeout-minutes: 120
 
       - name: Assemble tree
         run: cd UniXNU && ./unixnu tree
@@ -184,6 +183,13 @@ jobs:
           ./unixnu build kernel
           ls -lh out/gta4l/kernel/ || true
         timeout-minutes: 180
+
+      - name: Prelink kernel against the IPSW kernelcache
+        run: |
+          cd UniXNU
+          ./unixnu build prelink
+          ls -lh out/gta4l/kernel/ || true
+        timeout-minutes: 30
 
       - name: Dump build log on failure
         if: failure()
