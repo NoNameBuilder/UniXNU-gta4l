@@ -1299,8 +1299,6 @@ PY_BINDINGS
     KERNEL_ARCHIVE_DEPENDENCIES="$KERNEL_ARCHIVE_DEPENDENCIES $ROOT/build/boot-progress/libBootProgress.a"
   fi
   KERNEL_EXTRA_ARCHIVES="$KERNEL_EXTRA_ARCHIVES ${XNU_EXTRA_LD_ARCHIVES:-}"
-  EXTRA_MAKE_ARGS+=("LD_KERNEL_ARCHIVES=$KERNEL_EXTRA_ARCHIVES")
-  EXTRA_MAKE_ARGS+=("XNU_EXTERNAL_KERNEL_ARCHIVES=$KERNEL_ARCHIVE_DEPENDENCIES")
 fi
 python3 - "${XNU_NATIVE_AES:-0}" "${XNU_NATIVE_AES_ARCHIVE:-$ROOT/build/native-aes/libNativeAES.a}" \
   "${XNU_NATIVE_VIRTIO_BLOCK:-0}" "${XNU_NATIVE_VIRTIO_BLOCK_ARCHIVE:-$ROOT/build/native-virtio-block/libNativeVirtioBlock.a}" \
@@ -1349,8 +1347,6 @@ if [ ! -f "$STUB_DIR/libLegacyDisplayProbe.a" ]; then
 fi
 KERNEL_EXTRA_ARCHIVES="${KERNEL_EXTRA_ARCHIVES:-} -Wl,-force_load,$STUB_DIR/libLegacyDisplayProbe.a"
 KERNEL_ARCHIVE_DEPENDENCIES="${KERNEL_ARCHIVE_DEPENDENCIES:-} $STUB_DIR/libLegacyDisplayProbe.a"
-EXTRA_MAKE_ARGS+=("LD_KERNEL_ARCHIVES=$KERNEL_EXTRA_ARCHIVES")
-EXTRA_MAKE_ARGS+=("XNU_EXTERNAL_KERNEL_ARCHIVES=$KERNEL_ARCHIVE_DEPENDENCIES")
 echo "stub archive wired: $KERNEL_EXTRA_ARCHIVES"
 
 # nabu: VerifiedRoot symbols for NativeUfs. The real vr_open / vr_verify_block come from
@@ -1383,9 +1379,13 @@ CPPEOF
   fi
   KERNEL_EXTRA_ARCHIVES="${KERNEL_EXTRA_ARCHIVES:-} -Wl,-force_load,$VR_OUT/libVerifiedRootStub.a"
   KERNEL_ARCHIVE_DEPENDENCIES="${KERNEL_ARCHIVE_DEPENDENCIES:-} $VR_OUT/libVerifiedRootStub.a"
-  EXTRA_MAKE_ARGS+=("LD_KERNEL_ARCHIVES=$KERNEL_EXTRA_ARCHIVES")
-  EXTRA_MAKE_ARGS+=("XNU_EXTERNAL_KERNEL_ARCHIVES=$KERNEL_ARCHIVE_DEPENDENCIES")
 fi
+
+# Every archive above has to reach make in one argument: a second
+# LD_KERNEL_ARCHIVES= in the argv silently replaces the first, which dropped
+# firehose/corecrypto/pthread/mockfs and failed the link on their symbols.
+EXTRA_MAKE_ARGS+=("LD_KERNEL_ARCHIVES=${KERNEL_EXTRA_ARCHIVES:-}")
+EXTRA_MAKE_ARGS+=("XNU_EXTERNAL_KERNEL_ARCHIVES=${KERNEL_ARCHIVE_DEPENDENCIES:-}")
 
 # nabu: NativeUfs/RamBlock/VirtioBlock include <IOKit/storage/*.h> from
 # build/storage-abi/include. The full audit (audit-storage-interface.py) also needs a
