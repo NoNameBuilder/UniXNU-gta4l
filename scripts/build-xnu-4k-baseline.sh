@@ -93,6 +93,13 @@ for LATE_PATCH in "$ROOT/patches/xnu/zzz-boot-progress.patch" "$ROOT/patches/xnu
   fi
 done
 for PATCH in "$ROOT"/patches/xnu/*.patch "$ROOT"/kits/NativePrelink/patches/*.patch; do
+  # Boot progress is off: its patch only adds call sites, and the fuzz fallback
+  # below drops them at file scope in sleh.c (statement outside a function).
+  # ponytail: re-enable with XNU_BOOT_PROGRESS=1 only after the patch context is
+  # rebased on this tree.
+  if [ "$(basename "$PATCH")" = zzz-boot-progress.patch ] && [ "${XNU_BOOT_PROGRESS:-0}" != 1 ]; then
+    continue
+  fi
   if git -C .cache/xnu-work apply --reverse --check "$PATCH" >/dev/null 2>&1; then
     continue            # already applied
   fi
