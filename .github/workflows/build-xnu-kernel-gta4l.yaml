@@ -4,13 +4,13 @@ on:
   workflow_dispatch:
     inputs:
       device_repository:
-        description: Device repository as owner/name
-        required: true
-        default: Mizanla/UniXNU-gta4l
+        description: Device repository as owner/name (empty = this repository)
+        required: false
+        default: ""
       device_ref:
-        description: Device repository ref
-        required: true
-        default: main
+        description: Device repository ref (empty = the ref this run was started on)
+        required: false
+        default: ""
 
 jobs:
   build:
@@ -54,8 +54,8 @@ jobs:
       - name: Checkout Device Repository
         uses: actions/checkout@v4
         with:
-          repository: ${{ inputs.device_repository }}
-          ref: ${{ inputs.device_ref }}
+          repository: ${{ inputs.device_repository || github.repository }}
+          ref: ${{ inputs.device_ref || github.ref_name }}
           path: device
           submodules: recursive
           token: ${{ secrets.GH_PAT || github.token }}
@@ -188,8 +188,18 @@ jobs:
       - name: Dump build log on failure
         if: failure()
         run: |
-          echo "===== kernel-bootstrap.log ====="
-          tail -100 UniXNU/out/gta4l/logs/kernel-bootstrap.log 2>/dev/null || echo "(missing)"
+          for log in kernel.log kernel-bootstrap.log; do
+            f="UniXNU/out/gta4l/logs/$log"
+            echo "===== $log ====="
+            if [ -f "$f" ]; then
+              echo "--- errors ---"
+              grep -n -E "error:|Undefined symbols|symbol\(s\) not found|make(\[[0-9]+\])?: \*\*\*|^\+ exit " "$f" | tail -40 || true
+              echo "--- tail ---"
+              tail -40 "$f"
+            else
+              echo "(missing)"
+            fi
+          done
 
       - name: Upload artifacts
         if: always()
@@ -199,4 +209,5 @@ jobs:
           path: |
             UniXNU/out/gta4l/kernel/
             UniXNU/out/gta4l/logs/
+            UniXNU/out/gta4l/tree/build/xnu/ios-obj/DEVELOPMENT_ARM64_BCM2837/mach.development.bcm2837.unstripped.noctf
           if-no-files-found: warn
