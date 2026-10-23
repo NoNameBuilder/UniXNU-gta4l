@@ -182,6 +182,11 @@ boot_progress_bind(uintptr_t base, unsigned width, unsigned height,
 	if (!bp_trylock()) {
 		return;
 	}
+	if (bp_bound && bp_fb == (volatile uint32_t *)base) {
+		/* initialize_screen() is called again on console acquire; keep the log. */
+		bp_unlock();
+		return;
+	}
 	bp_fb = (volatile uint32_t *)base;
 	bp_width = width;
 	bp_height = height;
