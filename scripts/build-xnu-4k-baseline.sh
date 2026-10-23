@@ -1092,8 +1092,23 @@ else
   EXTRA_MAKE_ARGS+=("pcb.o_CFLAGS_ADD=")
   EXTRA_MAKE_ARGS+=("platform_tests.o_CFLAGS_ADD=")
 fi
+# The driver builds the board archives between its two passes, but a cold tree
+# can reach the link without them. Build the ones the defconfig enables here,
+# but only once the compile records exist (the builders read them).
+RECORDS=$ROOT/build/xnu/ios-obj/DEVELOPMENT_ARM64_BCM2837/osfmk/DEVELOPMENT/startup.o.json
+ensure_archive() {
+  [ -f "$1" ] && return 0
+  [ -f "$RECORDS" ] || return 0
+  shift
+  echo "building missing archive: $*"
+  ( cd "$ROOT/scripts" && python3 "$@" ) || true
+}
 if [ "${XNU_SOURCE_CORECRYPTO14:-0}" = 1 ]; then
   CRYPTO_ARCHIVE=$ROOT/build/corecrypto-2023/libcorecrypto_kernel_noasm-namespaced.a
+  if [ ! -f "$CRYPTO_ARCHIVE" ]; then
+    ensure_archive "$CRYPTO_ARCHIVE" build-corecrypto-14.py
+    ensure_archive "$CRYPTO_ARCHIVE" build-corecrypto-14.py --namespace
+  fi
   [ -f "$CRYPTO_ARCHIVE" ] || echo "WARN: $CRYPTO_ARCHIVE missing; archives are built after the record pass" >&2
   EXTRA_CFLAGS="$EXTRA_CFLAGS -DXNU_SOURCE_CORECRYPTO14=1"
   KERNEL_EXTRA_ARCHIVES="-L$KERNEL_SDKROOT/usr/local/lib/kernel -lfirehose_kernel $CRYPTO_ARCHIVE"
@@ -1274,6 +1289,7 @@ PY_BINDINGS
   if [ "${XNU_SOURCE_PTHREAD:-0}" = 1 ]; then
     PTHREAD_ARCHIVE=$ROOT/build/libpthread-kernel/libpthread_kernel.a
     PTHREAD_BOOTSTRAP=$ROOT/build/libpthread-kernel/source_pthread_bootstrap.o
+    ensure_archive "$PTHREAD_ARCHIVE" build-libpthread-kernel.py
     [ -f "$PTHREAD_ARCHIVE" ] || echo "WARN: $PTHREAD_ARCHIVE missing; archives are built after the record pass" >&2
     [ -f "$PTHREAD_BOOTSTRAP" ] || echo "WARN: $PTHREAD_BOOTSTRAP missing; archives are built after the record pass" >&2
     KERNEL_EXTRA_ARCHIVES="$KERNEL_EXTRA_ARCHIVES -Wl,-force_load,$PTHREAD_ARCHIVE"
@@ -1287,6 +1303,7 @@ PY_BINDINGS
   fi
   if [ "$MOCKFS_MODE" = 1 ]; then
     MOCKFS_ARCHIVE=$ROOT/build/mockfs-fixture/libmockfs_fixture.a
+    ensure_archive "$MOCKFS_ARCHIVE" build-mockfs-fixture.py
     [ -f "$MOCKFS_ARCHIVE" ] || echo "WARN: $MOCKFS_ARCHIVE missing; archives are built after the record pass" >&2
     KERNEL_EXTRA_ARCHIVES="$KERNEL_EXTRA_ARCHIVES -Wl,-force_load,$MOCKFS_ARCHIVE"
     KERNEL_ARCHIVE_DEPENDENCIES="$KERNEL_ARCHIVE_DEPENDENCIES $MOCKFS_ARCHIVE"
