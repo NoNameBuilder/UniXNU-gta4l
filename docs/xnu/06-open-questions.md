@@ -21,17 +21,12 @@ bytes are not the ones we patched, or the jump lands elsewhere.
 `DarwinEnter` that prints `Kernel.Entry`, `Kernel.Base`, `Entry PA` and the four
 words read at the entry PA. Requires the UEFI payload build, not a kernel build.
 
-## 3. Is the hardware SHA-256 path reachable on a v8.0 core?
+## 3. (resolved) hardware SHA-256 is unreachable
 
-`_AccelerateCrypto_SHA256_compress` is the only place where the kernel executes
-an instruction this CPU does not implement (`sha256h.*`). It should only be
-selected when corecrypto's CPU dispatch sees SHA-2 support, which this unit does
-not report, but that is asserted rather than proven.
-
-**Experiment:** in the `corecrypto-2023` feed, follow the `ccdigest_sha256`
-init path to the ARM64 capability check, and confirm the software block is the
-fallback when `HWCAP_SHA2` is clear. If it is not, add the equivalent of
-`CONFIG_XNU_NATIVE_AES=n` for SHA-2, or patch the dispatch.
+Answered in [05-findings.md](05-findings.md#2-the-rest-of-the-instruction-set-is-safe):
+`CCSHA2_VNG_ARM` is 0 in this build, `ccsha256_di()` returns the software LTC
+implementation, and `_ccsha256_vng_arm_di` does not exist in the artifact. No
+action needed.
 
 ## 4. Does `initialize_screen()` actually put text on the panel?
 

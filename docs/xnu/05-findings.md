@@ -33,13 +33,21 @@ filtered for everything above ARMv8.0-A:
 | SVE/SVE2/SME (`ldff1*`, `sttp`, `fmopa`, `cmla`, `cmphi`) | only in `K256` and in the padding after `_lz4_encode_2gb`, again data/padding |
 | PAC (`pac*`, `aut*`, `xpac*`, `bti`) | none |
 | `stlr`/`stlr*` | 142 occurrences, all baseline v8.0 store-release |
-| SHA-2 crypto (`sha256h.4s`, `sha256h2.4s`, `sha256su0/1.4s`) | 80 instructions, all in `_AccelerateCrypto_SHA256_compress` — **the only real hazard left**, see below |
+| SHA-2 crypto (`sha256h.4s`, `sha256h2.4s`, `sha256su0/1.4s`) | 80 instructions, all in `_AccelerateCrypto_SHA256_compress`; linked but unreachable, see below |
 
-So the kernel does not execute a v8.1+ instruction on any path we can see *except*
-the hardware SHA-256 compressor. This unit's dmesg does **not** report `sha1`/
-`sha2`/`aes`, so those instructions would UNDEF if dispatched to. The function is
-reachable only through corecrypto's CPU-feature dispatch; that dispatch is
-asserted, not proven, so it stays an open question (page 06).
+The one v8.1+ instruction sequence that *is* in the image is the hardware SHA-256
+compressor in `_AccelerateCrypto_SHA256_compress` (Apple's AccelerateCrypto,
+pulled in by the prelink). It is unreachable in this build:
+
+- `corecrypto/cc_config.h` sets `CCSHA2_VNG_ARM = (CC_ARM_NEON && CC_ARM_FEATURE_SHA2)`,
+  which is 0 for a plain `arm64` compile without `+sha2`;
+- the artifact contains `_ccsha256_ltc_di` (software) and **no**
+  `_ccsha256_vng_arm_di` symbol at all;
+- `_ccsha256_di` is `adrp/add #0xdf8; ret`, i.e. it always returns
+  `0xfffffff007165df8` = `_ccsha256_ltc_di`.
+
+So SHA-256 runs on the C implementation and never touches `sha256h.*`. dmesg
+agrees: only CRC32 is reported, no `sha1`/`sha2`/`aes`.
 
 Reproduce: `build/research/mnemonic-counts.txt`, `hazard-insns.txt`,
 `sha-all.txt` (the last one is the annotated list used above).
