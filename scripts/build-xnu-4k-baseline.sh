@@ -1368,12 +1368,14 @@ CPPEOF
 if [ "$BOOT_PROGRESS" != 1 ]; then
   printf 'extern "C" void boot_progress_poll(void) {}\n' >> "$STUB_DIR/LegacyDisplayProbe.cpp"
 fi
-if [ ! -f "$STUB_DIR/libLegacyDisplayProbe.a" ]; then
-  xcrun --sdk iphoneos clang++ -target arm64-apple-ios17.0 -mkernel -ffreestanding -fno-builtin -std=gnu++2b -O2 -c \
-    -o "$STUB_DIR/LegacyDisplayProbe.o" "$STUB_DIR/LegacyDisplayProbe.cpp" 2>/dev/null || true
-  ar rcs "$STUB_DIR/libLegacyDisplayProbe.a" "$STUB_DIR/LegacyDisplayProbe.o" 2>/dev/null || true
-  echo "built libLegacyDisplayProbe.a"
-fi
+# Rebuilt every pass: the bootstrap pass runs with XNU_BOOT_PROGRESS=0 and an
+# archive cached from it still defines boot_progress_poll, which collides with
+# libBootProgress.a in the pass that links.
+rm -f "$STUB_DIR/libLegacyDisplayProbe.a" "$STUB_DIR/LegacyDisplayProbe.o"
+xcrun --sdk iphoneos clang++ -target arm64-apple-ios17.0 -mkernel -ffreestanding -fno-builtin -std=gnu++2b -O2 -c \
+  -o "$STUB_DIR/LegacyDisplayProbe.o" "$STUB_DIR/LegacyDisplayProbe.cpp" 2>/dev/null || true
+ar rcs "$STUB_DIR/libLegacyDisplayProbe.a" "$STUB_DIR/LegacyDisplayProbe.o" 2>/dev/null || true
+echo "built libLegacyDisplayProbe.a"
 KERNEL_EXTRA_ARCHIVES="${KERNEL_EXTRA_ARCHIVES:-} -Wl,-force_load,$STUB_DIR/libLegacyDisplayProbe.a"
 KERNEL_ARCHIVE_DEPENDENCIES="${KERNEL_ARCHIVE_DEPENDENCIES:-} $STUB_DIR/libLegacyDisplayProbe.a"
 echo "stub archive wired: $KERNEL_EXTRA_ARCHIVES"
