@@ -624,11 +624,8 @@ if [ "$BOOT_PROGRESS" != 0 ] && [ "$BOOT_PROGRESS" != 1 ]; then
   exit 1
 fi
 if [ "$BOOT_PROGRESS" = 1 ]; then
-  if [ "${XNU_NATIVE_UFS:-0}" != 1 ] || [ "${XNU_OWNER_ROOT_AUDIT:-0}" != 1 ] || \
-     [ "${XNU_NATIVE_VIRTIO_BLOCK:-0}" != 1 ] || [ "${XNU_SOURCE_CORECRYPTO14:-0}" != 1 ]; then
-    echo 'Boot progress requires the audited UFS/owner-root, Virtio and source-corecrypto build' >&2
-    exit 1
-  fi
+  # ponytail: kits/sheng is a self-contained framebuffer logger, so it no longer
+  # requires the UFS/owner-root/Virtio/corecrypto diagnostic build.
   python3 scripts/build-boot-progress.py
 fi
 python3 - "$BOOT_PROGRESS" <<'PY'

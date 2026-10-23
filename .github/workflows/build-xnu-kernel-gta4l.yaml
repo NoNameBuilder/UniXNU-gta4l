@@ -20,6 +20,7 @@ jobs:
       GITHUB_TOKEN: ${{ secrets.GH_PAT || github.token }}
       UNIXNU_DEBUG_LDFILELIST: "1"
       XNU_MAKE_V: "1"
+      XNU_BOOT_PROGRESS: "1"
     steps:
       - uses: actions/checkout@v4
 
