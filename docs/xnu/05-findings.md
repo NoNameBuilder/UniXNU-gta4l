@@ -90,3 +90,17 @@ Checked on the exact file that was flashed, not on the build directory:
 - the entry word inside the image is `12eeff17` = `b 0xfffffff0073eacd0`.
 
 This rules out "the wrong kernel got flashed" for the band-1 probe image.
+
+## Current images (2026-10-23)
+
+| file | purpose | sha256 |
+| --- | --- | --- |
+| `build/boot-out/boot-log.img` | panel console build from CI run 39914676625 | `0b8ace56…7cb44` |
+| `build/boot-out/boot-probe-band0.img` | entry-probe ladder (band 0 / band 2, reset 6 s) | `0d0a9933…7730b` |
+
+`boot-log.img` carries the prelinked `kernel.macho` of commit `1ddcad2`; the
+panel sink binds in `initialize_screen()`, so the first visible line is the one
+printed after the framebuffer is mapped, then the recorded stage log replays.
+If the panel stays on the loader bar, `boot-log.img` never reached
+`initialize_screen()`; flash `boot-probe-band0.img` to separate a loader/jump
+failure (green only) from a hang inside `arm_vm_init` (blue+magenta, no reset).
