@@ -1392,6 +1392,20 @@ fi
 # Every archive above has to reach make in one argument: a second
 # LD_KERNEL_ARCHIVES= in the argv silently replaces the first, which dropped
 # firehose/corecrypto/pthread/mockfs and failed the link on their symbols.
+# The compile-record pass runs before the archives are built, and make treats
+# every entry here as a prerequisite. Drop the ones that do not exist yet; the
+# pass that links has all of them.
+_filter_existing() {
+  _keep=
+  for _token in $1; do
+    case "$_token" in
+      *.a|*.o) [ -f "$_token" ] && _keep="$_keep $_token" ;;
+      *) _keep="$_keep $_token" ;;
+    esac
+  done
+  printf '%s' "$_keep"
+}
+KERNEL_ARCHIVE_DEPENDENCIES=$(_filter_existing "${KERNEL_ARCHIVE_DEPENDENCIES:-}")
 EXTRA_MAKE_ARGS+=("LD_KERNEL_ARCHIVES=${KERNEL_EXTRA_ARCHIVES:-}")
 EXTRA_MAKE_ARGS+=("XNU_EXTERNAL_KERNEL_ARCHIVES=${KERNEL_ARCHIVE_DEPENDENCIES:-}")
 
