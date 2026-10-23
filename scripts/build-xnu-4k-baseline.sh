@@ -1339,10 +1339,14 @@ mkdir -p "$STUB_DIR"
 cat > "$STUB_DIR/LegacyDisplayProbe.cpp" <<'CPPEOF'
 extern "C" void native_legacy_display_probe(void) {}
 extern "C" void native_legacy_display_late_probe(void) {}
-// Weak observer used by NativeUfs window reads; Apple ld treats the weak ref as
-// strong under -new_linker + force_load, so provide an empty strong definition.
-extern "C" void boot_progress_poll(void) {}
 CPPEOF
+# Weak observer used by NativeUfs window reads; Apple ld treats the weak ref as
+# strong under -new_linker + force_load, so provide an empty strong definition.
+# With the boot console enabled the real one lives in libBootProgress.a, and a
+# second definition would be a duplicate symbol.
+if [ "$BOOT_PROGRESS" != 1 ]; then
+  printf 'extern "C" void boot_progress_poll(void) {}\n' >> "$STUB_DIR/LegacyDisplayProbe.cpp"
+fi
 if [ ! -f "$STUB_DIR/libLegacyDisplayProbe.a" ]; then
   xcrun --sdk iphoneos clang++ -target arm64-apple-ios17.0 -mkernel -ffreestanding -fno-builtin -std=gnu++2b -O2 -c \
     -o "$STUB_DIR/LegacyDisplayProbe.o" "$STUB_DIR/LegacyDisplayProbe.cpp" 2>/dev/null || true
