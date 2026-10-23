@@ -1094,49 +1094,49 @@ else
 fi
 if [ "${XNU_SOURCE_CORECRYPTO14:-0}" = 1 ]; then
   CRYPTO_ARCHIVE=$ROOT/build/corecrypto-2023/libcorecrypto_kernel_noasm-namespaced.a
-  test -f "$CRYPTO_ARCHIVE"
+  [ -f "$CRYPTO_ARCHIVE" ] || echo "WARN: $CRYPTO_ARCHIVE missing; archives are built after the record pass" >&2
   EXTRA_CFLAGS="$EXTRA_CFLAGS -DXNU_SOURCE_CORECRYPTO14=1"
   KERNEL_EXTRA_ARCHIVES="-L$KERNEL_SDKROOT/usr/local/lib/kernel -lfirehose_kernel $CRYPTO_ARCHIVE"
   KERNEL_ARCHIVE_DEPENDENCIES=$CRYPTO_ARCHIVE
   if [ "$ADRENO_FIRMWARE_PROBE" = 1 ]; then
     ADRENO_PROBE_ARCHIVE=$ROOT/build/adreno-firmware-probe/libAdrenoFirmwareProbe.a
-    test -f "$ADRENO_PROBE_ARCHIVE"
+    [ -f "$ADRENO_PROBE_ARCHIVE" ] || echo "WARN: $ADRENO_PROBE_ARCHIVE missing; archives are built after the record pass" >&2
     KERNEL_EXTRA_ARCHIVES="$KERNEL_EXTRA_ARCHIVES -Wl,-force_load,$ADRENO_PROBE_ARCHIVE"
     KERNEL_ARCHIVE_DEPENDENCIES="$KERNEL_ARCHIVE_DEPENDENCIES $ADRENO_PROBE_ARCHIVE"
   fi
   if [ "$ADRENO_PM4_PROBE" = 1 ]; then
     PM4_PROBE_ARCHIVE=$ROOT/build/adreno-pm4-probe/libAdrenoPM4Probe.a
-    test -f "$PM4_PROBE_ARCHIVE"
+    [ -f "$PM4_PROBE_ARCHIVE" ] || echo "WARN: $PM4_PROBE_ARCHIVE missing; archives are built after the record pass" >&2
     KERNEL_EXTRA_ARCHIVES="$KERNEL_EXTRA_ARCHIVES -Wl,-force_load,$PM4_PROBE_ARCHIVE"
     KERNEL_ARCHIVE_DEPENDENCIES="$KERNEL_ARCHIVE_DEPENDENCIES $PM4_PROBE_ARCHIVE"
   fi
   if [ "$SMMU4K_PROBE" = 1 ]; then
     SMMU4K_PROBE_ARCHIVE=$ROOT/build/smmu4k-probe/libArmSmmu4KProbe.a
-    test -f "$SMMU4K_PROBE_ARCHIVE"
+    [ -f "$SMMU4K_PROBE_ARCHIVE" ] || echo "WARN: $SMMU4K_PROBE_ARCHIVE missing; archives are built after the record pass" >&2
     KERNEL_EXTRA_ARCHIVES="$KERNEL_EXTRA_ARCHIVES -Wl,-force_load,$SMMU4K_PROBE_ARCHIVE"
     KERNEL_ARCHIVE_DEPENDENCIES="$KERNEL_ARCHIVE_DEPENDENCIES $SMMU4K_PROBE_ARCHIVE"
   fi
   if [ "$CONSTANT_UPLOADS_PROBE" = 1 ]; then
     CONSTANT_UPLOADS_ARCHIVE=$ROOT/build/constant-uploads-probe/libConstantUploadsProbe.a
-    test -f "$CONSTANT_UPLOADS_ARCHIVE"
+    [ -f "$CONSTANT_UPLOADS_ARCHIVE" ] || echo "WARN: $CONSTANT_UPLOADS_ARCHIVE missing; archives are built after the record pass" >&2
     KERNEL_EXTRA_ARCHIVES="$KERNEL_EXTRA_ARCHIVES -Wl,-force_load,$CONSTANT_UPLOADS_ARCHIVE"
     KERNEL_ARCHIVE_DEPENDENCIES="$KERNEL_ARCHIVE_DEPENDENCIES $CONSTANT_UPLOADS_ARCHIVE"
   fi
   if [ "${XNU_ARMVIRT_PLATFORM:-0}" = 1 ]; then
     ARMVIRT_ARCHIVE=$ROOT/build/armvirt-platform/libArmVirtPlatform.a
-    test -f "$ARMVIRT_ARCHIVE"
+    [ -f "$ARMVIRT_ARCHIVE" ] || echo "WARN: $ARMVIRT_ARCHIVE missing; archives are built after the record pass" >&2
     KERNEL_EXTRA_ARCHIVES="$KERNEL_EXTRA_ARCHIVES -Wl,-force_load,$ARMVIRT_ARCHIVE"
     KERNEL_ARCHIVE_DEPENDENCIES="$KERNEL_ARCHIVE_DEPENDENCIES $ARMVIRT_ARCHIVE"
   fi
   if [ "$ARM_DT_PLATFORM" = 1 ]; then
     ARM_DT_ARCHIVE=$ROOT/build/armdt-platform/libArmDTPlatform.a
-    test -f "$ARM_DT_ARCHIVE"
+    [ -f "$ARM_DT_ARCHIVE" ] || echo "WARN: $ARM_DT_ARCHIVE missing; archives are built after the record pass" >&2
     KERNEL_EXTRA_ARCHIVES="$KERNEL_EXTRA_ARCHIVES -Wl,-force_load,$ARM_DT_ARCHIVE"
     KERNEL_ARCHIVE_DEPENDENCIES="$KERNEL_ARCHIVE_DEPENDENCIES $ARM_DT_ARCHIVE"
   fi
   if [ "${XNU_ARMCPU:-0}" = 1 ]; then
     ARMCPU_ARCHIVE=$ROOT/build/armcpu/libArmCpu.a
-    test -f "$ARMCPU_ARCHIVE"
+    [ -f "$ARMCPU_ARCHIVE" ] || echo "WARN: $ARMCPU_ARCHIVE missing; archives are built after the record pass" >&2
     KERNEL_EXTRA_ARCHIVES="$KERNEL_EXTRA_ARCHIVES -Wl,-force_load,$ARMCPU_ARCHIVE"
     KERNEL_ARCHIVE_DEPENDENCIES="$KERNEL_ARCHIVE_DEPENDENCIES $ARMCPU_ARCHIVE"
 
@@ -1152,7 +1152,7 @@ fi
   fi
   if [ "${XNU_NATIVE_UFS:-0}" = 1 ]; then
     UFS_ARCHIVE=$ROOT/build/native-ufs/libNativeUfs.a
-    test -f "$UFS_ARCHIVE"
+    [ -f "$UFS_ARCHIVE" ] || echo "WARN: $UFS_ARCHIVE missing; archives are built after the record pass" >&2
     KERNEL_EXTRA_ARCHIVES="$KERNEL_EXTRA_ARCHIVES -Wl,-force_load,$UFS_ARCHIVE"
     KERNEL_ARCHIVE_DEPENDENCIES="$KERNEL_ARCHIVE_DEPENDENCIES $UFS_ARCHIVE"
     # nabu: NativeUfsBlock derives from IOBlockStorageDevice, which lives in the
@@ -1172,13 +1172,13 @@ fi
     # NativeAdreno plus its kits (scripts/build-native-adreno-kits.py). No personality is installed: the
     # board probe calls NativeAdrenoGmuContextBringup directly once it has powered the GPU CX domain.
     ADRENO_ARCHIVE=$ROOT/build/native-adreno/libNativeAdreno.a
-    test -f "$ADRENO_ARCHIVE"
+    [ -f "$ADRENO_ARCHIVE" ] || echo "WARN: $ADRENO_ARCHIVE missing; archives are built after the record pass" >&2
     KERNEL_EXTRA_ARCHIVES="$KERNEL_EXTRA_ARCHIVES -Wl,-force_load,$ADRENO_ARCHIVE"
     KERNEL_ARCHIVE_DEPENDENCIES="$KERNEL_ARCHIVE_DEPENDENCIES $ADRENO_ARCHIVE"
   fi
   if [ "$NATIVE_MOBILE_DISPLAY" = 1 ]; then
     MOBILE_DISPLAY_ARCHIVE=$ROOT/build/native-mobile-display/libNativeMobileDisplay.late.a
-    test -f "$MOBILE_DISPLAY_ARCHIVE"
+    [ -f "$MOBILE_DISPLAY_ARCHIVE" ] || echo "WARN: $MOBILE_DISPLAY_ARCHIVE missing; archives are built after the record pass" >&2
     python3 - "$MOBILE_DISPLAY_ARCHIVE" <<'PY_MOBILE_DISPLAY'
 import hashlib, json, sys
 from pathlib import Path
@@ -1192,7 +1192,7 @@ PY_MOBILE_DISPLAY
   fi
   if [ "$NATIVE_LEGACY_DISPLAY" = 1 ]; then
     LEGACY_DISPLAY_ARCHIVE=$ROOT/build/native-legacy-display/libNativeLegacyDisplay.late.a
-    test -f "$LEGACY_DISPLAY_ARCHIVE"
+    [ -f "$LEGACY_DISPLAY_ARCHIVE" ] || echo "WARN: $LEGACY_DISPLAY_ARCHIVE missing; archives are built after the record pass" >&2
     python3 - "$LEGACY_DISPLAY_ARCHIVE" "$ROOT" <<'PY_LEGACY_DISPLAY'
 import hashlib, json, sys
 from pathlib import Path
@@ -1208,19 +1208,19 @@ PY_LEGACY_DISPLAY
   fi
   if [ "${XNU_NATIVE_AES:-0}" = 1 ]; then
     AES_ARCHIVE=${XNU_NATIVE_AES_ARCHIVE:-$ROOT/build/native-aes/libNativeAES.a}
-    test -f "$AES_ARCHIVE"
+    [ -f "$AES_ARCHIVE" ] || echo "WARN: $AES_ARCHIVE missing; archives are built after the record pass" >&2
     KERNEL_EXTRA_ARCHIVES="$KERNEL_EXTRA_ARCHIVES -Wl,-force_load,$AES_ARCHIVE"
     KERNEL_ARCHIVE_DEPENDENCIES="$KERNEL_ARCHIVE_DEPENDENCIES $AES_ARCHIVE"
   fi
   if [ "${XNU_NATIVE_VIRTIO_BLOCK:-0}" = 1 ]; then
     VIRTIO_ARCHIVE=${XNU_NATIVE_VIRTIO_BLOCK_ARCHIVE:-$ROOT/build/native-virtio-block/libNativeVirtioBlock.a}
-    test -f "$VIRTIO_ARCHIVE"
+    [ -f "$VIRTIO_ARCHIVE" ] || echo "WARN: $VIRTIO_ARCHIVE missing; archives are built after the record pass" >&2
     KERNEL_EXTRA_ARCHIVES="$KERNEL_EXTRA_ARCHIVES -Wl,-force_load,$VIRTIO_ARCHIVE"
     KERNEL_ARCHIVE_DEPENDENCIES="$KERNEL_ARCHIVE_DEPENDENCIES $VIRTIO_ARCHIVE"
   fi
   if [ "$NATIVE_OFFLINE_GPU" = 1 ]; then
     GPU_BROKER_ARCHIVE=$ROOT/build/native-offline-gpu/libNativeOfflineGPU.late.a
-    test -f "$GPU_BROKER_ARCHIVE"
+    [ -f "$GPU_BROKER_ARCHIVE" ] || echo "WARN: $GPU_BROKER_ARCHIVE missing; archives are built after the record pass" >&2
     python3 - "$GPU_BROKER_ARCHIVE" "$ROOT" <<'PY_GPU_BROKER'
 import hashlib,json,sys
 from pathlib import Path
@@ -1238,13 +1238,13 @@ PY_GPU_BROKER
   fi
   if [ "$NATIVE_VIRTIO_CONSOLE" = 1 ]; then
     CONSOLE_ARCHIVE=$ROOT/build/native-virtio-console/libNativeVirtioConsole.a
-    test -f "$CONSOLE_ARCHIVE"
+    [ -f "$CONSOLE_ARCHIVE" ] || echo "WARN: $CONSOLE_ARCHIVE missing; archives are built after the record pass" >&2
     KERNEL_EXTRA_ARCHIVES="$KERNEL_EXTRA_ARCHIVES -Wl,-force_load,$CONSOLE_ARCHIVE"
     KERNEL_ARCHIVE_DEPENDENCIES="$KERNEL_ARCHIVE_DEPENDENCIES $CONSOLE_ARCHIVE"
   fi
   if [ "$NATIVE_RAM_BLOCK" = 1 ]; then
     RAM_BLOCK_ARCHIVE=$ROOT/build/native-ram-block/libNativeRamBlock.a
-    test -f "$RAM_BLOCK_ARCHIVE"
+    [ -f "$RAM_BLOCK_ARCHIVE" ] || echo "WARN: $RAM_BLOCK_ARCHIVE missing; archives are built after the record pass" >&2
     if [ "${XNU_NATIVE_VIRTIO_BLOCK:-0}" = 1 ]; then
       # Both transports import the same original class. Keep one exact alias
       # definition; link the real RAM transport object, not duplicate aliases.
@@ -1264,7 +1264,7 @@ if any(first.get(name) != value for name, value in second.items()):
     raise SystemExit('RAM transport imports must match the already linked original storage bindings')
 PY_BINDINGS
       RAM_BLOCK_OBJECT=$ROOT/build/native-ram-block/NativeRamBlock.o
-      test -f "$RAM_BLOCK_OBJECT"
+      [ -f "$RAM_BLOCK_OBJECT" ] || echo "WARN: $RAM_BLOCK_OBJECT missing; archives are built after the record pass" >&2
       KERNEL_EXTRA_ARCHIVES="$KERNEL_EXTRA_ARCHIVES $RAM_BLOCK_OBJECT"
     else
       KERNEL_EXTRA_ARCHIVES="$KERNEL_EXTRA_ARCHIVES -Wl,-force_load,$RAM_BLOCK_ARCHIVE"
@@ -1274,26 +1274,26 @@ PY_BINDINGS
   if [ "${XNU_SOURCE_PTHREAD:-0}" = 1 ]; then
     PTHREAD_ARCHIVE=$ROOT/build/libpthread-kernel/libpthread_kernel.a
     PTHREAD_BOOTSTRAP=$ROOT/build/libpthread-kernel/source_pthread_bootstrap.o
-    test -f "$PTHREAD_ARCHIVE"
-    test -f "$PTHREAD_BOOTSTRAP"
+    [ -f "$PTHREAD_ARCHIVE" ] || echo "WARN: $PTHREAD_ARCHIVE missing; archives are built after the record pass" >&2
+    [ -f "$PTHREAD_BOOTSTRAP" ] || echo "WARN: $PTHREAD_BOOTSTRAP missing; archives are built after the record pass" >&2
     KERNEL_EXTRA_ARCHIVES="$KERNEL_EXTRA_ARCHIVES -Wl,-force_load,$PTHREAD_ARCHIVE"
     KERNEL_ARCHIVE_DEPENDENCIES="$KERNEL_ARCHIVE_DEPENDENCIES $PTHREAD_ARCHIVE"
   fi
   if [ "$OWNER_ROOT_PROBE" = 1 ]; then
     VERIFIED_ROOT_ARCHIVE=${XNU_VERIFIED_ROOT_ARCHIVE:-$ROOT/build/verified-root-xnu/libVerifiedRootProbe.a}
-    test -f "$VERIFIED_ROOT_ARCHIVE"
+    [ -f "$VERIFIED_ROOT_ARCHIVE" ] || echo "WARN: $VERIFIED_ROOT_ARCHIVE missing; archives are built after the record pass" >&2
     KERNEL_EXTRA_ARCHIVES="$KERNEL_EXTRA_ARCHIVES -Wl,-force_load,$VERIFIED_ROOT_ARCHIVE"
     KERNEL_ARCHIVE_DEPENDENCIES="$KERNEL_ARCHIVE_DEPENDENCIES $VERIFIED_ROOT_ARCHIVE"
   fi
   if [ "$MOCKFS_MODE" = 1 ]; then
     MOCKFS_ARCHIVE=$ROOT/build/mockfs-fixture/libmockfs_fixture.a
-    test -f "$MOCKFS_ARCHIVE"
+    [ -f "$MOCKFS_ARCHIVE" ] || echo "WARN: $MOCKFS_ARCHIVE missing; archives are built after the record pass" >&2
     KERNEL_EXTRA_ARCHIVES="$KERNEL_EXTRA_ARCHIVES -Wl,-force_load,$MOCKFS_ARCHIVE"
     KERNEL_ARCHIVE_DEPENDENCIES="$KERNEL_ARCHIVE_DEPENDENCIES $MOCKFS_ARCHIVE"
   fi
   if [ "$SHENG_PMGR" = 1 ]; then
     PMGR_ARCHIVE=$ROOT/build/sheng-platform-power/libShengPlatformPower.a
-    test -f "$PMGR_ARCHIVE"
+    [ -f "$PMGR_ARCHIVE" ] || echo "WARN: $PMGR_ARCHIVE missing; archives are built after the record pass" >&2
     KERNEL_EXTRA_ARCHIVES="$KERNEL_EXTRA_ARCHIVES -Wl,-force_load,$PMGR_ARCHIVE"
     KERNEL_ARCHIVE_DEPENDENCIES="$KERNEL_ARCHIVE_DEPENDENCIES $PMGR_ARCHIVE"
   fi
