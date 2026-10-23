@@ -47,7 +47,9 @@ no-ops unless `-DXNU_BOOT_PROGRESS=1` is set, so the same tree builds both ways.
   Text is white on opaque black; the `xnu: ` tag is cyan. Because the cell
   background is opaque, the loader's green bar disappears from row 0 as soon as
   the first line is drawn — that is the visual proof that the console is live.
-- When the bottom row is reached the text area is scrolled up by one cell row.
+- When the bottom row is reached the screen is cleared and logging restarts at the
+top (`ponytail:` one clear per 71 lines instead of a 9 MiB row copy per line
+under `-v`; history before the wrap is lost).
 - Binding and drawing are guarded by a non-blocking atomic lock: output from an
   interrupt handler is dropped instead of deadlocking the kernel.
 - No cache maintenance is needed or done: the framebuffer is mapped as I/O
