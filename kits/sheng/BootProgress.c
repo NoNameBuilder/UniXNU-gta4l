@@ -44,8 +44,8 @@ bp_unlock(void)
 	__atomic_clear(&bp_lock, __ATOMIC_RELEASE);
 }
 
-static void bp_scroll(void);
 static void bp_pixel(unsigned x, unsigned y, uint32_t color);
+static void bp_wrap(void);
 
 static void
 bp_clear_row(unsigned row)
@@ -100,32 +100,25 @@ bp_newline(void)
 {
 	bp_col = 0;
 	if (++bp_row >= bp_height / bp_ch) {
-		bp_scroll();
+		bp_wrap();
 	}
 	bp_clear_row(bp_row);
 }
 
-/* Move the drawn text up one cell row. Only the text area is touched. */
+/* Bottom of the screen reached: start over instead of copying rows.
+ * ponytail: history is lost on a wrap, but a wrap costs one clear instead of a
+ * 9 MiB row copy per line under -v. Upgrade path: a real ring buffer. */
 static void
-bp_scroll(void)
+bp_wrap(void)
 {
-	unsigned rows = bp_height / bp_ch;
-	unsigned bytes = (uint64_t)bp_stride * bp_ch;
-	volatile char *base = (volatile char *)bp_fb;
-	uint64_t i;
-	unsigned cell;
+	unsigned x, y;
 
-	if (bp_row == 0) {
-		return;
-	}
-	bp_row = rows - 1;
-	for (cell = 0; cell < rows - 1; cell++) {
-		volatile char *dst = base + (uint64_t)cell * bytes;
-		volatile char *src = dst + bytes;
-		for (i = 0; i < bytes; i++) {
-			dst[i] = src[i];
+	for (y = 0; y < bp_height; y++) {
+		for (x = 0; x < bp_width; x++) {
+			bp_pixel(x, y, 0xFF000000u);
 		}
 	}
+	bp_row = 0;
 }
 
 static void
