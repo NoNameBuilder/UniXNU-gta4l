@@ -161,14 +161,16 @@ jobs:
 
       - name: Verify archive builders
         run: |
-          cd UniXNU/out/gta4l/tree
           python3 - <<'PY'
           import tomllib, pathlib
-          b = tomllib.loads(pathlib.Path('board.toml').read_text())
+          b = tomllib.loads(pathlib.Path('device/board.toml').read_text())
+          tree = pathlib.Path('UniXNU/out/gta4l/tree')
           print('archives:', b.get('kernel', {}).get('archives'))
+          print('XNU_BUILD_ARCHIVES in defconfig:',
+                'CONFIG_XNU_BUILD_ARCHIVES=y' in pathlib.Path('device/configs/gta4l_defconfig').read_text())
           for entry in b.get('kernel', {}).get('archives', []):
               name = entry.split()[0]
-              print(name, 'exists' if pathlib.Path('scripts', name).is_file() else 'MISSING')
+              print(name, 'exists' if (tree / 'scripts' / name).is_file() else 'MISSING')
           PY
       - name: Clean build cache and fix setup
         run: |
