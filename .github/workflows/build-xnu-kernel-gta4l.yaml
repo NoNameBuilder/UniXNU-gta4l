@@ -212,8 +212,8 @@ jobs:
             if [ -f "$f" ]; then
               echo "--- errors ---"
               grep -n -E "error:|Undefined symbols|symbol\(s\) not found|archive built|building missing archive|WARN:|boot progress|zzz-boot-progress|duplicate symbol|make(\[[0-9]+\])?: \*\*\*|^\+ exit " "$f" | tail -60 || true
-    echo "--- tail 120 ---"
-    tail -120 "$f" 
+              echo "--- tail 120 ---"
+              tail -120 "$f"
               echo "--- tail ---"
               tail -40 "$f"
             else
