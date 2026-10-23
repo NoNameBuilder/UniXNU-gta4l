@@ -1101,7 +1101,11 @@ ensure_archive() {
   [ -f "$RECORDS" ] || return 0
   shift
   echo "building missing archive: $*"
-  ( cd "$ROOT/scripts" && python3 "$@" ) || true
+  if ( cd "$ROOT/scripts" && python3 "$@" ); then
+    echo "archive built: $1"
+  else
+    echo "error: archive builder failed: $*" >&2
+  fi
 }
 if [ "${XNU_SOURCE_CORECRYPTO14:-0}" = 1 ]; then
   CRYPTO_ARCHIVE=$ROOT/build/corecrypto-2023/libcorecrypto_kernel_noasm-namespaced.a

@@ -159,6 +159,17 @@ jobs:
           echo "=== cached json ==="
           ls -la .cache/sources/
 
+      - name: Verify archive builders
+        run: |
+          cd UniXNU/out/gta4l/tree
+          python3 - <<'PY'
+          import tomllib, pathlib
+          b = tomllib.loads(pathlib.Path('board.toml').read_text())
+          print('archives:', b.get('kernel', {}).get('archives'))
+          for entry in b.get('kernel', {}).get('archives', []):
+              name = entry.split()[0]
+              print(name, 'exists' if pathlib.Path('scripts', name).is_file() else 'MISSING')
+          PY
       - name: Clean build cache and fix setup
         run: |
           cd UniXNU
@@ -200,7 +211,9 @@ jobs:
             echo "===== $log ====="
             if [ -f "$f" ]; then
               echo "--- errors ---"
-              grep -n -E "error:|Undefined symbols|symbol\(s\) not found|make(\[[0-9]+\])?: \*\*\*|^\+ exit " "$f" | tail -40 || true
+              grep -n -E "error:|Undefined symbols|symbol\(s\) not found|archive built|building missing archive|WARN:|boot progress|zzz-boot-progress|duplicate symbol|make(\[[0-9]+\])?: \*\*\*|^\+ exit " "$f" | tail -60 || true
+    echo "--- tail 120 ---"
+    tail -120 "$f" 
               echo "--- tail ---"
               tail -40 "$f"
             else
