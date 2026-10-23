@@ -78,7 +78,7 @@ itself fault?"): if the device reboots, the call site was reached.
 |---|---|---|
 | `build/boot-out/boot-panfix.img` | PAN fix, no probes; green only is expected | — |
 | `build/boot-out/boot-probe-armvminit.img` | stage 1 in band 1, stage 2, reset after `_arm_vm_init` | `6b769e15…` |
-| `build/boot-out/boot-probe-band0.img` | stage 1 in band 0 (over the green bar), stage 2, reset after `_arm_vm_init` | `e0306cd6…` |
+| `build/boot-out/boot-probe-band0.img` | stage 1 in band 0 (over the green bar), stage 2, reset after `_arm_vm_init` | `0d0a9933…` |
 
 Flash with `heimdall flash --BOOT <image>`; the device owner does this, nothing
 in this repository writes a partition by itself.
